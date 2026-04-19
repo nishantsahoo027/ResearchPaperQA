@@ -191,28 +191,135 @@ with st.spinner('Loading knowledge base...'):
 
 # Sidebar
 with st.sidebar:
-    st.markdown('<div class="conv-section-label">About</div>', unsafe_allow_html=True)
-    st.caption("Ask questions about research papers in the knowledge base.")
-    st.caption(f"{doc_count} chunks loaded")
+    st.markdown("""
+    <style>
+    [data-testid="stSidebar"] {
+        border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .researcher-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.2rem;
+    }
+    .researcher-sub {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.35);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+    }
+    .divider {
+        height: 1px;
+        background: linear-gradient(90deg, rgba(102,126,234,0.4), transparent);
+        margin: 1rem 0;
+    }
+    .section-label {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: rgba(255,255,255,0.25);
+        margin: 0.8rem 0 0.5rem 0;
+    }
+    .kb-badge {
+        display: inline-block;
+        background: rgba(102,126,234,0.15);
+        border: 1px solid rgba(102,126,234,0.3);
+        border-radius: 20px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.78rem;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
 
-    st.markdown('<div class="conv-section-label">Try asking</div>', unsafe_allow_html=True)
+    /* New chat button */
+    div[data-testid="stSidebar"] div.new-chat-wrap > div > button {
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        box-shadow: 0 4px 15px rgba(102,126,234,0.3) !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Sample question buttons */
+    div[data-testid="stSidebar"] div.sample-wrap > div > button {
+        background: rgba(255,255,255,0.04) !important;
+        color: rgba(255,255,255,0.75) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 8px !important;
+        font-size: 0.82rem !important;
+        text-align: left !important;
+        margin-bottom: 0.4rem !important;
+        transition: all 0.2s !important;
+    }
+    div[data-testid="stSidebar"] div.sample-wrap > div > button:hover {
+        background: rgba(102,126,234,0.15) !important;
+        border-color: rgba(102,126,234,0.4) !important;
+        color: white !important;
+    }
+
+    .session-box {
+        background: rgba(102,126,234,0.08);
+        border: 1px solid rgba(102,126,234,0.2);
+        border-radius: 8px;
+        padding: 0.5rem 0.8rem;
+        margin-top: 1rem;
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.35);
+    }
+    .session-id {
+        font-family: monospace;
+        color: #667eea;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    </style>
+
+    <div class="researcher-title">⚗️ Researcher</div>
+    <div class="researcher-sub">Research Paper Q&A</div>
+    <div class="divider"></div>
+    <div class="kb-badge">📚 {doc_count} chunks loaded</div>
+    <div class="divider"></div>
+    <div class="section-label">✨ Try asking</div>
+    """.format(doc_count=doc_count), unsafe_allow_html=True)
+
     sample_questions = [
-        "What is the main contribution of this paper?",
-        "What methodology did the authors use?",
+        "What is the main contribution?",
+        "What methodology was used?",
         "What were the key results?",
-        "What are the limitations of this approach?",
+        "What are the limitations?",
         "How does this compare to prior work?",
     ]
+
     for q in sample_questions:
+        st.markdown('<div class="sample-wrap">', unsafe_allow_html=True)
         if st.button(q, use_container_width=True, key=f"sq_{q}"):
             st.session_state['prefill'] = q
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="new-chat-wrap">', unsafe_allow_html=True)
     if st.button("✏️ New chat", use_container_width=True):
         st.session_state['messages'] = []
         st.session_state['thread_id'] = str(uuid.uuid4())[:8]
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    thread = st.session_state.get('thread_id', '—')
+    st.markdown(f"""
+    <div class="session-box">
+        Session<br>
+        <span class="session-id">{thread}</span>
+    </div>
+    """, unsafe_allow_html=True)
 # Session state
 for key, default in [('messages', []), ('thread_id', str(uuid.uuid4())[:8])]:
     if key not in st.session_state:
@@ -224,7 +331,8 @@ for msg in st.session_state.messages:
         st.write(msg['content'])
 
 # Chat input
-if prompt := st.chat_input('Ask about the research papers...'):
+prefill = st.session_state.pop('prefill', '')
+if prompt := (prefill or st.chat_input('Ask about the research papers...')):
     with st.chat_message('user'):
         st.write(prompt)
     st.session_state.messages.append({'role': 'user', 'content': prompt})
