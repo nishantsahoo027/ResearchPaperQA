@@ -14,7 +14,7 @@ load_dotenv()
 
 st.set_page_config(page_title="Research Paper Q&A", layout="centered")
 st.title("Research Paper Q&A Agent")
-st.caption("Upload or ask questions about any research paper.")
+st.caption("Ask questions about any research paper in the knowledge base.")
 
 def _clean(text):
     text = re.sub(r'\n{3,}', '\n\n', text)
@@ -45,12 +45,12 @@ def load_agent():
     embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
     PDF_PAPERS = [
-        'papers/1312.5602v1.pdf',    # DQN original
-        'papers/1509.06461v3.pdf',   # Double DQN
-        'papers/1511.06581v3.pdf',   # Dueling DQN
-        'papers/1511.05952v4.pdf',   # Prioritized Replay
-        'papers/1710.02298v1.pdf',   # Rainbow
-        'papers/1602.01783v2.pdf',   # A3C
+        'papers/1312.5602v1.pdf',
+        'papers/1509.06461v3.pdf',
+        'papers/1511.06581v3.pdf',
+        'papers/1511.05952v4.pdf',
+        'papers/1710.02298v1.pdf',
+        'papers/1602.01783v2.pdf',
     ]
 
     cli = chromadb.Client()
@@ -189,7 +189,12 @@ def load_agent():
 with st.spinner('Loading knowledge base...'):
     agent_app, doc_count = load_agent()
 
-# Sidebar
+# ── Session state init (before sidebar so thread_id exists) ──
+for key, default in [('messages', []), ('thread_id', str(uuid.uuid4())[:8])]:
+    if key not in st.session_state:
+        st.session_state[key] = default
+
+# ── Sidebar ──────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
     <style>
@@ -234,8 +239,6 @@ with st.sidebar:
         color: #667eea;
         margin-bottom: 0.5rem;
     }
-
-    /* New chat button */
     div[data-testid="stSidebar"] div.new-chat-wrap > div > button {
         background: linear-gradient(135deg, #667eea, #764ba2) !important;
         color: white !important;
@@ -246,8 +249,9 @@ with st.sidebar:
         box-shadow: 0 4px 15px rgba(102,126,234,0.3) !important;
         margin-bottom: 0.5rem !important;
     }
-
-    /* Sample question buttons */
+    div[data-testid="stSidebar"] div.new-chat-wrap > div > button:hover {
+        opacity: 0.85 !important;
+    }
     div[data-testid="stSidebar"] div.sample-wrap > div > button {
         background: rgba(255,255,255,0.04) !important;
         color: rgba(255,255,255,0.75) !important;
@@ -256,14 +260,12 @@ with st.sidebar:
         font-size: 0.82rem !important;
         text-align: left !important;
         margin-bottom: 0.4rem !important;
-        transition: all 0.2s !important;
     }
     div[data-testid="stSidebar"] div.sample-wrap > div > button:hover {
         background: rgba(102,126,234,0.15) !important;
         border-color: rgba(102,126,234,0.4) !important;
         color: white !important;
     }
-
     .session-box {
         background: rgba(102,126,234,0.08);
         border: 1px solid rgba(102,126,234,0.2);
@@ -320,17 +322,13 @@ with st.sidebar:
         <span class="session-id">{thread}</span>
     </div>
     """, unsafe_allow_html=True)
-# Session state
-for key, default in [('messages', []), ('thread_id', str(uuid.uuid4())[:8])]:
-    if key not in st.session_state:
-        st.session_state[key] = default
 
-# Chat history
+# ── Chat history ─────────────────────────────────────────────
 for msg in st.session_state.messages:
     with st.chat_message(msg['role']):
         st.write(msg['content'])
 
-# Chat input
+# ── Chat input ───────────────────────────────────────────────
 prefill = st.session_state.pop('prefill', '')
 if prompt := (prefill or st.chat_input('Ask about the research papers...')):
     with st.chat_message('user'):
