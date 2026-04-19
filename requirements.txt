@@ -5,7 +5,7 @@ chromadb
 sentence-transformers
 duckduckgo-search
 python-dotenv
-pymupdf==1.23.8
+pymupdf
 streamlit
 pyngrok
 google-generativeai
