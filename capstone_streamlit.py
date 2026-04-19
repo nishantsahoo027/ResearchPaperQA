@@ -191,12 +191,32 @@ with st.spinner('Loading knowledge base...'):
 
 # Sidebar
 with st.sidebar:
-    st.title("Researcher")
-    st.divider()
-    if st.button("New chat"):
+    st.markdown("## 🔬 Researcher")
+    st.markdown("---")
+    st.markdown(
+        """
+        <style>
+        .new-chat-btn button {
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+        .new-chat-btn button:hover {
+            border-color: rgba(255,255,255,0.5);
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    st.markdown('<div class="new-chat-btn">', unsafe_allow_html=True)
+    if st.button("✏️ New chat", use_container_width=True):
         st.session_state.messages = []
         st.session_state.thread_id = str(uuid.uuid4())[:8]
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("---")
+    st.caption(f"Session: `{st.session_state.get('thread_id', '—')}`")
 
 # Session state
 for key, default in [('messages', []), ('thread_id', str(uuid.uuid4())[:8])]:
