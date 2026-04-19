@@ -14,7 +14,7 @@ load_dotenv()
 
 st.set_page_config(page_title="Research Paper Q&A", layout="centered")
 st.title("Research Paper Q&A Agent")
-st.caption("Ask questions about Deep Reinforcement Learning research.")
+st.caption("Upload or ask questions about any research paper.")
 
 def _clean(text):
     text = re.sub(r'\n{3,}', '\n\n', text)
@@ -191,83 +191,28 @@ with st.spinner('Loading knowledge base...'):
 
 # Sidebar
 with st.sidebar:
-    st.markdown("""
-    <style>
-    [data-testid="stSidebar"] {
-        border-right: 1px solid rgba(255,255,255,0.08);
-    }
-    .researcher-title {
-        font-size: 1.4rem;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0.2rem;
-    }
-    .researcher-sub {
-        font-size: 0.72rem;
-        color: rgba(255,255,255,0.35);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        margin-bottom: 1.5rem;
-    }
-    .new-chat-btn button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 10px !important;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
-        letter-spacing: 0.03em !important;
-        padding: 0.6rem !important;
-        transition: opacity 0.2s !important;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
-    }
-    .new-chat-btn button:hover {
-        opacity: 0.85 !important;
-    }
-    .session-box {
-        background: rgba(102, 126, 234, 0.08);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-        border-radius: 8px;
-        padding: 0.6rem 0.8rem;
-        margin-top: 1.5rem;
-        font-size: 0.75rem;
-        color: rgba(255,255,255,0.4);
-    }
-    .session-id {
-        font-family: monospace;
-        color: #667eea;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-    .divider {
-        height: 1px;
-        background: linear-gradient(90deg, rgba(102,126,234,0.4), transparent);
-        margin: 1rem 0;
-    }
-    </style>
+    st.markdown('<div class="conv-section-label">About</div>', unsafe_allow_html=True)
+    st.caption("Ask questions about research papers in the knowledge base.")
+    st.caption(f"{doc_count} chunks loaded")
 
-    <div class="researcher-title">⚗️ Researcher</div>
-    <div class="researcher-sub">Deep RL · 6 Papers</div>
-    <div class="divider"></div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="conv-section-label">Try asking</div>', unsafe_allow_html=True)
+    sample_questions = [
+        "What is the main contribution of this paper?",
+        "What methodology did the authors use?",
+        "What were the key results?",
+        "What are the limitations of this approach?",
+        "How does this compare to prior work?",
+    ]
+    for q in sample_questions:
+        if st.button(q, use_container_width=True, key=f"sq_{q}"):
+            st.session_state['prefill'] = q
+            st.rerun()
 
-    st.markdown('<div class="new-chat-btn">', unsafe_allow_html=True)
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
     if st.button("✏️ New chat", use_container_width=True):
-        st.session_state.messages = []
-        st.session_state.thread_id = str(uuid.uuid4())[:8]
+        st.session_state['messages'] = []
+        st.session_state['thread_id'] = str(uuid.uuid4())[:8]
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    thread = st.session_state.get('thread_id', '—')
-    st.markdown(f"""
-    <div class="session-box">
-        <div>Session</div>
-        <div class="session-id">{thread}</div>
-    </div>
-    """, unsafe_allow_html=True)
 # Session state
 for key, default in [('messages', []), ('thread_id', str(uuid.uuid4())[:8])]:
     if key not in st.session_state:
@@ -279,7 +224,7 @@ for msg in st.session_state.messages:
         st.write(msg['content'])
 
 # Chat input
-if prompt := st.chat_input('Ask about the papers...'):
+if prompt := st.chat_input('Ask about the research papers...'):
     with st.chat_message('user'):
         st.write(prompt)
     st.session_state.messages.append({'role': 'user', 'content': prompt})
