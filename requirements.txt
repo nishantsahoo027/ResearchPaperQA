@@ -1,0 +1,12 @@
+langchain-groq
+langchain-core
+langgraph
+chromadb
+sentence-transformers
+duckduckgo-search
+python-dotenv
+pymupdf==1.23.8
+streamlit
+pyngrok
+google-generativeai
+langchain-google-genai
