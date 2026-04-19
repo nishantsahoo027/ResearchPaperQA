@@ -13,7 +13,7 @@ from langgraph.checkpoint.memory import MemorySaver
 load_dotenv()
 
 st.set_page_config(page_title="Research Paper Q&A", layout="centered")
-st.title("📄 Research Paper Q&A Agent")
+st.title("Research Paper Q&A Agent")
 st.caption("Ask questions about Deep Reinforcement Learning research.")
 
 def _clean(text):
@@ -191,24 +191,9 @@ with st.spinner('Loading knowledge base...'):
 
 # Sidebar
 with st.sidebar:
-    st.header("About")
-    st.write("Ask questions about 6 foundational Deep Reinforcement Learning papers.")
+    st.title("Researcher")
     st.divider()
-    st.write("**Papers covered:**")
-    papers = [
-        "DQN (1312.5602)",
-        "Double DQN (1509.06461)",
-        "Prioritized Replay (1511.05952)",
-        "Dueling DQN (1511.06581)",
-        "A3C (1602.01783)",
-        "Rainbow (1710.02298)",
-    ]
-    for p in papers:
-        st.write(f"• {p}")
-    st.divider()
-    st.write(f"**KB:** {doc_count} chunks loaded")
-    st.write(f"**Session:** {st.session_state.get('thread_id', 'not started')}")
-    if st.button("🗑️ New conversation"):
+    if st.button("New chat"):
         st.session_state.messages = []
         st.session_state.thread_id = str(uuid.uuid4())[:8]
         st.rerun()
