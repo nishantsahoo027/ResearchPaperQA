@@ -1,8 +1,7 @@
 # 📄 Research Paper Q&A Agent
 
-**Agentic AI Capstone Project**
 **Student:** Nishant Sahoo
-**Course:** Agentic AI Hands-On | Dr. Kanthi Kiran Sirra | 2026
+**Course:** Agentic AI
 
 ---
 
